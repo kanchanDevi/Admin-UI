@@ -1,18 +1,24 @@
 import React, { useState, useEffect } from "react";
 import Header from "./Header";
 import { USERDATA } from "../utils/constant";
-import { BsFillTrashFill, BsPencilSquare } from "react-icons/bs";
+import { BsFillTrashFill, BsPencilSquare, BsChevronDoubleLeft, BsChevronDoubleRight } from "react-icons/bs";
+// import { AiFillEdit } from "react-icons/ai";
+
 
 const Body = () => {
   const [search, setSearch] = useState("");
   const [users, setUsers] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
+  const [isEdit, setIsEdit] = useState(false);
+  // const [userEdit, setUserEdit] = useState(-1);
+
 
   const handlerChange = (e) => {
     setSearch(e.target.value);
   };
 
+  
   useEffect(() => {
     response();
   }, []);
@@ -49,6 +55,10 @@ const Body = () => {
     console.log(newItems);
   };
 
+  const handleEditing=(index)=>{
+    console.log(index)
+    setIsEdit(true)
+  }
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
   };
@@ -84,7 +94,7 @@ const Body = () => {
         <table className="min-w-[95%] text-left text-lg divide-y p-5 divide-gray-200 m-5">
           <thead className="bg-gray-50 h-10">
             <tr>
-              <th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 <input
                   type="checkbox"
                   name="allSelect"
@@ -103,19 +113,26 @@ const Body = () => {
 
           {itemsToDiaplay && itemsToDiaplay.length > 0
             ? itemsToDiaplay
-                .filter((user, index) => {
-                  return search.toLocaleLowerCase() === ""
-                    ? user
-                    : user.name.toLocaleLowerCase().includes(search);
-                })
+            .filter((user) => {
+              if (search === "") return user;
+              else if (
+                user.name.includes(search) ||
+                user.email.includes(search) ||
+                user.role.includes(search)
+              ) {
+                return user;
+              }
+            })
                 .map((user, index) => (
                   <tbody key={index} className="h-11">
                     <tr>
-                      <td>
+                  
+                      <td className="px-6 py-4 whitespace-nowrap">
                         <input
                           type="checkbox"
                           name={user.name}
                           className="h-5 w-5 "
+                         
                           checked={user?.isChecked || false}
                           onChange={handleChange}
                         />
@@ -123,12 +140,16 @@ const Body = () => {
                       <td>{user.name}</td>
                       <td>{user.email}</td>
                       <td>{user.role}</td>
+                      
                       <td className="flex">
-                        <span className="p-2">
-                          <BsPencilSquare />{" "}
+                     
+
+                        <span className="p-2 text-blue-500" onClick={()=>handleEditing(user.id)}>
+                          <BsPencilSquare />
                         </span>
                         <span
-                          className="p-2"
+                          className="p-2 text-red-600"
+      
                           onClick={() => {
                             deleteIcon(user.id);
                           }}
@@ -142,18 +163,18 @@ const Body = () => {
                 ))
             : ""}
         </table>
-        <div className=" flex flex-row justify-end m-5 p-5">
+        <div className=" flex flex-row justify-end m-5 p-5 group/item">
           <button
             className="p-2 text-black-200 font-bold "
             onClick={handlePrevClick}
             disabled={preDisabled}
           >
-            Prev
+            {<BsChevronDoubleLeft/>}
           </button>
           {Array.from({ length: totalPages }, (_, i) => {
             return (
               <button
-                className="bg-blue-500 rounded-full m-1 w-9 p-2 text-sm text-black-300"
+                className="bg-blue-500 rounded-full m-1 w-9 p-2 text-sm text-black-300 hover:bg-blue-600  group-hover/item:visible ..."
                 onClick={() => handlePageChange(i + 1)}
                 key={i}
                 disabled={i + 1 === currentPage}
@@ -168,7 +189,7 @@ const Body = () => {
             onClick={handleNextClick}
             disabled={nextDisabled}
           >
-            Next
+          <BsChevronDoubleRight/>
           </button>
         </div>
       </div>
